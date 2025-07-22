@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {# display the current user's name #}
+    The current connected user is: {{ user }} </br>
+
+    {# Get permission for the current user : view pokemon.pokemon #}
+    Can view Pokémons: {{ perms.pokemon.view_pokemon }} </br>
+
+    {# Get permission for the current user : change pokemon.pokemon #}
+    Can change pokemons: {{ perms.pokemon.change_pokemon }} </br>
+
+    {# Get permission for the current user : change legendary pokemon #}
+    Can change legendary Pokémons: {{ perms.pokemon.change_legendary_pokemon }} </br>
+
+
+</body>
+</html>

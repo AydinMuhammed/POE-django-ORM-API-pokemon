@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pokemon',  # Assurez-vous que l'application 'pokemon' est ajoutée ici
+    'django_extensions',  # Pour django-extensions
 ]
 
 MIDDLEWARE = [

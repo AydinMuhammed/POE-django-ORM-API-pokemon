@@ -51,6 +51,9 @@ class Pokemon(models.Model):
         verbose_name = "pokémon"
         verbose_name_plural = "pokémons"
         unique_together = [("number", "name", "version")]
+        permissions = [
+            ("change_legendary_pokemon", "Can change legendary Pokémons"),
+        ]
         
 
     def __str__(self):
