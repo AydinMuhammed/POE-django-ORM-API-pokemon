@@ -24,6 +24,37 @@ def create_type(request, type: TypeCreationSchema):
     instance, updated = Type.objects.update_or_create(name=type.name, defaults={"description": type.description})
     return instance
 
+ # Récupérer la liste complète des types existants.
+ # Pour tester dans Postman, il faut faire un GET sur http://127.0.0.1:8000/api/types
+@api.get("/types", response=list[TypeSchema])
+def list_types(request):
+    """
+    Route to list all types.
+    
+    Returns:
+        list[TypeSchema]: A list of all types.
+    """
+    types = Type.objects.all()
+    return types
+
+# Créer un Pokémon.
+# Pour tester dans Postman, il faut faire un POST sur http://127.0.0.1:8000/api/pokemon/create
+# Exemple de json à envoyer pour ce post :
+# {
+#     "number": 991,
+#     "name": "Boulbizarre",
+#     "version": "Domotique",
+#     "type1_name": "Grass",
+#     "type2_name": "Poison",
+#     "hp": 45,
+#     "attack": 49,
+#     "defense": 49,
+#     "special_attack": 65,
+#     "special_defense": 65,
+#     "speed": 45,
+#     "generation_number": 4,
+#     "legendary": false
+# }
 @api.post("/pokemon/create", response={200: PokemonSchema, 401: Any})
 def create_pokemon(request, pokemon: PokemonCreateSchema):
     """
