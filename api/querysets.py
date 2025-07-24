@@ -12,17 +12,71 @@ def list_pokemons(request):
     pokemons = Pokemon.objects.all()
     return pokemons
 
+#Créer un nouveau type.
 # Pour tester dans Postman, il faut faire un POST sur http://127.0.0.1:8000/api/type/create
-@api.post("/type/create", response=TypeSchema)
-def create_type(request, type: TypeCreationSchema):
+# Exemple de json à envoyer pour ce post :
+# {
+#     "name": "Steel",
+#     "description": "Steel type Pokémon are known for their high defense and resistance to many types of attacks."
+# }
+@api.post("/type/create", response=dict[str, bool | TypeSchema])
+def create_type(request, data: TypeSchema):
     # Créer ou mettre à jour les informations d'un Type
     # avec la méthode `objects.update_or_create` :
     # ici, l'argument name= indique qu'on cherche en premier lieu
     # un objet avec une valeur précise à l'attribut name
     # l'argument defaults= permet d'indiquer que, si on trouve cet objet
     # on mettra à jour son attribut description=
-    instance, updated = Type.objects.update_or_create(name=type.name, defaults={"description": type.description})
-    return instance
+    instance, created = Type.objects.update_or_create(name=data.name, defaults={"description": data.description})
+    return {"created": created, "instance": instance}
+
+# Supprimer un type
+# Pour tester dans Postman, il faut faire un DELETE sur http://127.0.0.1:8000/api/type/delete/{name}
+@api.delete("/type/delete/{name}", response=dict[str, bool])
+def delete_type(request, name: str):
+    """
+    Route to delete a type by its name.
+    
+    Args:
+        request (Request): The request object.
+        name (str): The name of the type.
+    
+    Returns:
+        dict[str, bool]: A dictionary with the status of the deletion.
+    """
+    instance = Type.objects.filter(name=name).first()
+    if not instance:
+        return {"success": False, "error": "Type not found"}
+    instance.delete()
+    return {"success": True}
+
+# Modifier un type existant à partir de son nom.
+# Pour tester dans Postman, il faut faire un PUT sur http://127.0.0.1:8000/api/type/edit/{name}
+# Exemple de json à envoyer pour ce put :
+# {
+#     "name": "Steel",
+#     "description": "Steel type Pokémon are known for their high defense and resistance to many types of attacks."
+# }
+@api.put("/type/edit/{name}", response=dict[str, bool | TypeSchema])
+def edit_type(request, name: str, data: TypeSchema):
+    """
+    Route to edit a type by its name.
+    
+    Args:
+        request (Request): The request object.
+        name (str): The name of the type.
+        data (TypeSchema): The new data for the type.
+    
+    Returns:
+        dict[str, bool | TypeSchema]: A dictionary with the status and the updated type.
+    """
+    instance = Type.objects.filter(name=name).first()
+    if not instance:
+        return {"success": False, "error": "Type not found"}
+    for attr, value in data.dict().items():
+        setattr(instance, attr, value)
+    instance.save()
+    return {"success": True, "instance": instance}
 
  # Récupérer la liste complète des types existants.
  # Pour tester dans Postman, il faut faire un GET sur http://127.0.0.1:8000/api/types

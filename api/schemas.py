@@ -50,7 +50,7 @@ class PokemonCreateSchema(ModelSchema):
     foreign key relations shown as nested objects.
     """
     type1_name: str
-    type2_name: str | None
+    type2_name: str | None = None
     generation_number: int
 
     class Meta:
