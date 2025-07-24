@@ -1,9 +1,10 @@
 from ninja import NinjaAPI, Path
 from .schemas import SumSchema
 
+
 api = NinjaAPI(title="Pokémon API")
 @api.get("/")
-def welcome(request, a : int | float = 1, b : int | float = 1):
+def welcome(request, a : int | float = 1, b : int = 2):
     """
     Basic entry point for the API.
 
@@ -32,10 +33,17 @@ def sum_numbers(request, pair: SumSchema):
 @api.get("/sum2/{x}/{y}")
 def sum_numbers2(request, pair: Path[SumSchema]):
     """
-    Entry point <ith dynamic part and path parameters for the API.
+    Entry point with dynamic part and path parameters for the API.
 
-    The 'pair' 
-    The dynamic
+    The `pair` argument is detected from the URL.
+    The dynamic parts `x` and `y` are detected from the URL and
+    used to set the attributes `x` and `y` of the `SumSchema` object.
+
+    Args:
+        x (int | float): The first number to be added
+        y (int | float): The second number to be added
+
+    Returns:
+        dict: A message indicating the API is **up and running**.
     """
-
     return {"result": pair.x + pair.y}

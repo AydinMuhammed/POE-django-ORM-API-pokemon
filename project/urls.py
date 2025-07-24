@@ -16,30 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from ninja import NinjaAPI
 from pokemon.views import view_home, view_login, view_logout
-
-api = NinjaAPI(title="Pokémon API")
-# ici c'est du ninja justement
-@api.get("/users/{id}")
-def user_details(request, id : int):
-    """
-    Basic entry point for the API.
-
-    Returns:
-        dict: A message indicating the API is working.
-    """
-    return {"message": f"Welcome to the Pokémon API {id}"}
-
-@api.get("/")
-def welcome(request, a : int | float = 1, b : int = 2):
-    """
-    Basic entry point for the API.
-
-    Returns:
-        dict: A message indicating the API is working.
-    """
-    return {"message": f"Welcome to the Pokémon API {a +b}"}
+from api import api
 
 urlpatterns = [
     path('admin/', admin.site.urls),
