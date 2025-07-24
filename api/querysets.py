@@ -37,6 +37,24 @@ def list_types(request):
     types = Type.objects.all()
     return types
 
+# Récupérer les détails d’un type à partir de son nom.
+# Pour tester dans Postman, il faut faire un GET sur http://127.0.0.1:8000/api/type/{name}
+# Exemple : http://127.0.0.1:8000/api/type/Steel
+@api.get("/type/{name}", response=TypeSchema)
+def get_type(request, name: str):
+    """
+    Route to get a type by its name.
+    
+    Args:
+        request (Request): The request object.
+        name (str): The name of the type.
+    
+    Returns:
+        TypeSchema: The type object.
+    """
+    type = Type.objects.get(name=name)
+    return type
+
 # Créer un Pokémon.
 # Pour tester dans Postman, il faut faire un POST sur http://127.0.0.1:8000/api/pokemon/create
 # Exemple de json à envoyer pour ce post :
