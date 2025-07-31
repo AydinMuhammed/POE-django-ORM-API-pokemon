@@ -12,7 +12,7 @@ api.add_router("/basics/", "api.basics.router")         # Endpoints de base (ex 
 api.add_router("/pokemon/", "api.pokemon.router")       # Endpoints pour manipuler les Pokémon (vue, liste, etc.)
 api.add_router("/querysets/", "api.querysets.router")   # Endpoints pour manipuler des ensembles de données
 api.add_router("/type/", "api.type.router")             # Endpoints pour les types de Pokémon (création, édition, etc.)
-api.add_router("/auth/", "api.authentication.router")   # Endpoints pour l'authentification (clé API, basic auth)
+api.add_router("/auth/", "api.authentification.router")   # Endpoints pour l'authentification (clé API, basic auth)
 api.add_router("/auth/mobile/", mobile_auth_router)     # Endpoints pour l'authentification JWT mobile
 api.add_router("/auth/web/", web_auth_router)           # Endpoints pour l'authentification JWT web
 
