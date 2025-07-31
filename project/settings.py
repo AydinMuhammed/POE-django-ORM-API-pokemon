@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'pokemon',  # Assurez-vous que l'application 'pokemon' est ajoutée ici
     'django_extensions',  # Pour django-extensions
     'ninja_simple_jwt', # Pour l'authentification JWT
+    "ninja_apikey", # Pour l'authentification par clé API
 ]
 
 MIDDLEWARE = [
