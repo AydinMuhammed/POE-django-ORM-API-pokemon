@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'pokemon',  # Assurez-vous que l'application 'pokemon' est ajoutée ici
     'django_extensions',  # Pour django-extensions
+    'ninja_simple_jwt', # Pour l'authentification JWT
 ]
 
 MIDDLEWARE = [

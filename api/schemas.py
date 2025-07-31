@@ -14,7 +14,7 @@ class TypeSchema(ModelSchema):
         fields = "__all__"
 
 class TypeCreationSchema(ModelSchema):
-    """ Ninja schema for the Pokemon type model. """
+    """ Ninja schema for the Pokemon type model, used for creation. """
 
     class Meta:
         model = Type

@@ -2,117 +2,33 @@ from typing import Any
 from django.db import IntegrityError
 from api.schemas import PokemonSchema, PokemonSchemaMini, TypeCreationSchema, TypeSchema, PokemonCreateSchema
 from pokemon.models import Pokemon, Type, Generation
-from .ninja import api
+from ninja import Router
 from ninja.pagination import paginate, PageNumberPagination
 
-# Pour tester dans Postman, il faut faire un GET sur http://127.0.0.1:8000/api/pokemons
-@api.get("/pokemons", response = list[PokemonSchemaMini])
+# Création d'un routeur Ninja pour les opérations sur les ensembles de données (querysets).
+router = Router()
+
+@router.get("/pokemons", response = list[PokemonSchemaMini])
 @paginate(PageNumberPagination, page_size=10)
+# Endpoint pour lister tous les Pokémons avec pagination.
+# Système de routing : cette route correspond à /api/querysets/pokemons (voir api/ninja.py).
+# Pour tester dans Postman :
+# - Méthode : GET
+# - URL : http://127.0.0.1:8000/api/querysets/pokemons
+# - Paramètres de pagination possibles : ?page=1
 def list_pokemons(request):
+    """List all Pokemons."""
     pokemons = Pokemon.objects.all()
     return pokemons
 
-#Créer un nouveau type.
-# Pour tester dans Postman, il faut faire un POST sur http://127.0.0.1:8000/api/type/create
-# Exemple de json à envoyer pour ce post :
-# {
-#     "name": "Steel",
-#     "description": "Steel type Pokémon are known for their high defense and resistance to many types of attacks."
-# }
-@api.post("/type/create", response=dict[str, bool | TypeSchema])
-def create_type(request, data: TypeSchema):
-    # Créer ou mettre à jour les informations d'un Type
-    # avec la méthode `objects.update_or_create` :
-    # ici, l'argument name= indique qu'on cherche en premier lieu
-    # un objet avec une valeur précise à l'attribut name
-    # l'argument defaults= permet d'indiquer que, si on trouve cet objet
-    # on mettra à jour son attribut description=
-    instance, created = Type.objects.update_or_create(name=data.name, defaults={"description": data.description})
-    return {"created": created, "instance": instance}
-
-# Supprimer un type
-# Pour tester dans Postman, il faut faire un DELETE sur http://127.0.0.1:8000/api/type/delete/{name}
-@api.delete("/type/delete/{name}", response=dict[str, bool])
-def delete_type(request, name: str):
-    """
-    Route to delete a type by its name.
-    
-    Args:
-        request (Request): The request object.
-        name (str): The name of the type.
-    
-    Returns:
-        dict[str, bool]: A dictionary with the status of the deletion.
-    """
-    instance = Type.objects.filter(name=name).first()
-    if not instance:
-        return {"success": False, "error": "Type not found"}
-    instance.delete()
-    return {"success": True}
-
-# Modifier un type existant à partir de son nom.
-# Pour tester dans Postman, il faut faire un PUT sur http://127.0.0.1:8000/api/type/edit/{name}
-# Exemple de json à envoyer pour ce put :
-# {
-#     "name": "Steel",
-#     "description": "Steel type Pokémon are known for their high defense and resistance to many types of attacks."
-# }
-@api.put("/type/edit/{name}", response=dict[str, bool | TypeSchema])
-def edit_type(request, name: str, data: TypeSchema):
-    """
-    Route to edit a type by its name.
-    
-    Args:
-        request (Request): The request object.
-        name (str): The name of the type.
-        data (TypeSchema): The new data for the type.
-    
-    Returns:
-        dict[str, bool | TypeSchema]: A dictionary with the status and the updated type.
-    """
-    instance = Type.objects.filter(name=name).first()
-    if not instance:
-        return {"success": False, "error": "Type not found"}
-    for attr, value in data.dict().items():
-        setattr(instance, attr, value)
-    instance.save()
-    return {"success": True, "instance": instance}
-
- # Récupérer la liste complète des types existants.
- # Pour tester dans Postman, il faut faire un GET sur http://127.0.0.1:8000/api/types
-@api.get("/types", response=list[TypeSchema])
-def list_types(request):
-    """
-    Route to list all types.
-    
-    Returns:
-        list[TypeSchema]: A list of all types.
-    """
-    types = Type.objects.all()
-    return types
-
-# Récupérer les détails d’un type à partir de son nom.
-# Pour tester dans Postman, il faut faire un GET sur http://127.0.0.1:8000/api/type/{name}
-# Exemple : http://127.0.0.1:8000/api/type/Steel
-@api.get("/type/{name}", response=TypeSchema)
-def get_type(request, name: str):
-    """
-    Route to get a type by its name.
-    
-    Args:
-        request (Request): The request object.
-        name (str): The name of the type.
-    
-    Returns:
-        TypeSchema: The type object.
-    """
-    type = Type.objects.get(name=name)
-    return type
-
-# Créer un Pokémon.
-# Pour tester dans Postman, il faut faire un POST sur http://127.0.0.1:8000/api/pokemon/create
-# Exemple de json à envoyer pour ce post :
-# {
+@router.post("/pokemon/create", response={200: PokemonSchema, 401: Any})
+# Endpoint pour créer un nouveau Pokémon.
+# Système de routing : cette route correspond à /api/querysets/pokemon/create (voir api/ninja.py).
+# Pour tester dans Postman :
+# - Méthode : POST
+# - URL : http://127.0.0.1:8000/api/querysets/pokemon/create
+# - Body (JSON) :
+#   {
 #     "number": 991,
 #     "name": "Boulbizarre",
 #     "version": "Domotique",
@@ -126,29 +42,25 @@ def get_type(request, name: str):
 #     "speed": 45,
 #     "generation_number": 4,
 #     "legendary": false
-# }
-@api.post("/pokemon/create", response={200: PokemonSchema, 401: Any})
+#   }
 def create_pokemon(request, pokemon: PokemonCreateSchema):
     """
     Route to create a pokemon.
-    
-    Uses a custom schema to create the pokemon.
-    The schema does not include the type1 and type2 fields, as these are foreign keys to the Type model.
-    It does not include the generation field, as this is a foreign key to the Generation model.
-    Instead it includes the type1_name, type2_name and generation_number fields, which are used to look up the type and generation objects.
 
-    Once it's done, we create a new Pokemon object an set its attributes from
-    the input pokemon object (as a dict), the we set the foreign keys on the instance.
+    Utilise un schéma personnalisé pour créer le Pokémon.
+    Les champs type1 et type2 (foreign keys) sont remplacés par type1_name et type2_name,
+    et la génération par generation_number, pour simplifier l'entrée côté client.
 
-    If an error occurs, it returns a 401 status code and a message.
-    See https://django-ninja.dev/guides/response/#multiple-response-schemas
+    Si une erreur survient (doublon, type ou génération inexistante), la route retourne un code 401 avec un message d'erreur.
+    Voir https://django-ninja.dev/guides/response/#multiple-response-schemas
 
     Args:
-        request (Request): The request object.
-        pokemon (PokemonCreateSchema): The pokemon to create.
-    
+        request (Request): L'objet requête.
+        pokemon (PokemonCreateSchema): Les données du Pokémon à créer.
+
     Returns:
-        Pokemon: The created pokemon.
+        Pokemon: Le Pokémon créé (code 200).
+        401: Si le Pokémon ne peut pas être créé, ou si le type/génération n'existe pas.
     """
     try:
         type1 = Type.objects.get(name=pokemon.type1_name)
@@ -157,11 +69,20 @@ def create_pokemon(request, pokemon: PokemonCreateSchema):
         instance = Pokemon()
         for attr, value in pokemon.dict().items():
             setattr(instance, attr, value)
-        # Define foreign keys on the instance
+        # Définir les clés étrangères sur l'instance
         instance.type1 = type1
         instance.type2 = type2
         instance.generation = generation
         instance.save()
     except IntegrityError:
         return (401, {"detail": "Pokemon cannot be created, it already exists."})
+    except Generation.DoesNotExist:
+        return (401, {"detail": "Generation does not exist."})
+    except Type.DoesNotExist:
+        return (401, {"detail": "Type does not exist."})
     return instance
+
+# Explications générales :
+# - Le système de routing de Django Ninja permet de définir des routes accessibles sous /api/querysets/ grâce à l'ajout du routeur dans api/ninja.py.
+# - Les routes peuvent être statiques ou dynamiques, et acceptent des paramètres dans l'URL ou dans le corps de la requête (JSON).
+# - Pour tester chaque endpoint dans Postman, il faut respecter la méthode HTTP, l'URL, et fournir les bons paramètres (dans l'URL, en query string ou en JSON).

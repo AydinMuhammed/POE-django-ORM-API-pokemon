@@ -1,21 +1,25 @@
 from django.shortcuts import redirect, render
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import login, logout
 from pokemon.forms import LoginForm
-# Create your views here.
 
-# @user_passes_test(lambda u: u.has_perm("pokemon.view_pokemon"))
-# @login_required
+
+
+# @user_passes_test(lambda user: user.has_perm("pokemon.view_pokemon"))
 def view_home(request):
-    """Render the home page."""
+    """Home page."""
+
+    # Get the current user
     user = request.user
+    # Get whether the user has permission to view the pokemon.pokemon model
     can_view_pokemon = user.has_perm("pokemon.view_pokemon")
-    
-    print(f"User: {user}, Can view pokemon: {can_view_pokemon}")
-    return render(request, 'pokemon/page-home.html', context={})
+    # Show the informations cleanly in the console
+    print(f"User: {user}")
+    print(f"Can view pokemon: {can_view_pokemon}")
+    return render(request, "pokemon/page-home.html", context={})
 
 
-
+@user_passes_test(lambda user: user.is_anonymous)
 def view_login(request):
     form = LoginForm(data=request.POST or None)
     if form.is_valid():
@@ -25,6 +29,7 @@ def view_login(request):
     return render(request, "pokemon/page-login.html", context={"form": form})
 
 
+@user_passes_test(lambda user: user.is_authenticated)
 def view_logout(request):
     logout(request)
-    return redirect("home")
+    return redirect("login")
